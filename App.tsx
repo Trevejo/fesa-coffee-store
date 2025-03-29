@@ -3,6 +3,13 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import { initDatabase } from './src/database';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import CoffeeProductListing from './src/screens/CoffeeProductListing';
+import ProductDetailsScreen from './src/screens/ProductDetailsScreen';
+import { RootStackParamList } from './src/types/navigation';
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   const [isDbInitialized, setIsDbInitialized] = useState(false);
@@ -22,18 +29,57 @@ export default function App() {
     initDb();
   }, []);
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Coffee Shop App</Text>
-      {error ? (
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Coffee Shop App</Text>
         <Text style={styles.error}>{error}</Text>
-      ) : !isDbInitialized ? (
+        <StatusBar style="auto" />
+      </View>
+    );
+  }
+
+  if (!isDbInitialized) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Coffee Shop App</Text>
         <Text>Initializing database...</Text>
-      ) : (
-        <Text>Database initialized successfully!</Text>
-      )}
+        <StatusBar style="auto" />
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator 
+        initialRouteName="Products"
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#6F4E37', // Coffee brown
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      >
+        <Stack.Screen 
+          name="Products" 
+          component={CoffeeProductListing}
+          options={{
+            title: 'Coffee Products'
+          }}
+        />
+        <Stack.Screen 
+          name="ProductDetails" 
+          component={ProductDetailsScreen}
+          options={{
+            title: 'Product Details'
+          }}
+        />
+      </Stack.Navigator>
       <StatusBar style="auto" />
-    </View>
+    </NavigationContainer>
   );
 }
 

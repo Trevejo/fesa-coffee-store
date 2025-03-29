@@ -1,0 +1,300 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  SafeAreaView,
+  TextInput,
+  ScrollView
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+
+// Sample coffee product data
+const coffeeProducts = [
+  {
+    id: '1',
+    name: 'Espresso',
+    description: 'Strong concentrated coffee served in small shots',
+    price: 3.99,
+    image: 'https://picsum.photos/id/431/300/300',
+    rating: 4.8,
+    category: 'Hot Coffee'
+  },
+  {
+    id: '2',
+    name: 'Cappuccino',
+    description: 'Espresso with steamed milk foam',
+    price: 4.99,
+    image: 'https://picsum.photos/id/425/300/300',
+    rating: 4.7,
+    category: 'Hot Coffee'
+  },
+  {
+    id: '3',
+    name: 'Iced Americano',
+    description: 'Espresso diluted with cold water and ice',
+    price: 4.49,
+    image: 'https://picsum.photos/id/493/300/300',
+    rating: 4.5,
+    category: 'Cold Coffee'
+  },
+  {
+    id: '4',
+    name: 'Caramel Macchiato',
+    description: 'Espresso with vanilla syrup, milk and caramel drizzle',
+    price: 5.49,
+    image: 'https://picsum.photos/id/435/300/300',
+    rating: 4.9,
+    category: 'Hot Coffee'
+  },
+  {
+    id: '5',
+    name: 'Cold Brew',
+    description: 'Coffee brewed with cold water over extended time',
+    price: 4.99,
+    image: 'https://picsum.photos/id/430/300/300',
+    rating: 4.6,
+    category: 'Cold Coffee'
+  },
+  {
+    id: '6',
+    name: 'Mocha Frappuccino',
+    description: 'Blended coffee with chocolate, milk and ice',
+    price: 5.99,
+    image: 'https://picsum.photos/id/437/300/300',
+    rating: 4.7,
+    category: 'Cold Coffee'
+  },
+];
+
+// Categories for filtering
+const categories = ['All', 'Hot Coffee', 'Cold Coffee', 'Seasonal'];
+
+const CoffeeProductListing = () => {
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter products based on category and search query
+  const filteredProducts = coffeeProducts.filter(product => {
+    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  // Render individual product card
+  const renderProductCard = ({ item }: { item: any }) => (
+    <TouchableOpacity style={styles.productCard}>
+      <Image source={{ uri: item.image }} style={styles.productImage} />
+      <View style={styles.productInfo}>
+        <View style={styles.ratingContainer}>
+          <Feather name="star" size={14} color="#FFD700" />
+          <Text style={styles.ratingText}>{item.rating}</Text>
+        </View>
+        <Text style={styles.productName}>{item.name}</Text>
+        <Text style={styles.productDescription} numberOfLines={2}>
+          {item.description}
+        </Text>
+        <View style={styles.priceRow}>
+          <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+          <TouchableOpacity style={styles.addButton}>
+            <Feather name="plus" size={16} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  // Render category pill
+  const renderCategoryPill = (category: string) => (
+    <TouchableOpacity
+      key={category}
+      style={[
+        styles.categoryPill,
+        selectedCategory === category && styles.selectedCategoryPill
+      ]}
+      onPress={() => setSelectedCategory(category)}
+    >
+      <Text
+        style={[
+          styles.categoryText,
+          selectedCategory === category && styles.selectedCategoryText
+        ]}
+      >
+        {category}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <Text style={styles.headerTitle}>Coffee Shop</Text>
+          <TouchableOpacity style={styles.cartButton}>
+            <Feather name="shopping-bag" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.searchContainer}>
+          <Feather name="search" size={20} color="#7D7D7D" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search coffee..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
+      <View style={styles.categoriesContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {categories.map(category => renderCategoryPill(category))}
+        </ScrollView>
+      </View>
+
+      <FlatList
+        data={filteredProducts}
+        renderItem={renderProductCard}
+        keyExtractor={item => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.productRow}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.productList}
+      />
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9F9F9',
+  },
+  header: {
+    padding: 16,
+    backgroundColor: '#FFF',
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  cartButton: {
+    padding: 8,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F0F0',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+  },
+  categoriesContainer: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  categoryPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#F0F0F0',
+    marginRight: 8,
+  },
+  selectedCategoryPill: {
+    backgroundColor: '#6F4E37',
+  },
+  categoryText: {
+    fontSize: 14,
+    color: '#7D7D7D',
+  },
+  selectedCategoryText: {
+    color: '#FFF',
+    fontWeight: '500',
+  },
+  productList: {
+    padding: 8,
+  },
+  productRow: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
+  productCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    overflow: 'hidden',
+    width: '48%',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  productImage: {
+    width: '100%',
+    height: 150,
+    resizeMode: 'cover',
+  },
+  productInfo: {
+    padding: 12,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  ratingText: {
+    fontSize: 12,
+    color: '#7D7D7D',
+    marginLeft: 4,
+  },
+  productName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  productDescription: {
+    fontSize: 12,
+    color: '#7D7D7D',
+    marginBottom: 8,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  productPrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#6F4E37',
+  },
+  addButton: {
+    backgroundColor: '#6F4E37',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
+export default CoffeeProductListing;
