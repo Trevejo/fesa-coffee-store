@@ -11,6 +11,8 @@ import {
   ScrollView
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 
 // Sample coffee product data
 const coffeeProducts = [
@@ -73,7 +75,9 @@ const coffeeProducts = [
 // Categories for filtering
 const categories = ['All', 'Hot Coffee', 'Cold Coffee', 'Seasonal'];
 
-const CoffeeProductListing = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Products'>;
+
+const CoffeeProductListing = ({ navigation }: Props) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -86,7 +90,10 @@ const CoffeeProductListing = () => {
 
   // Render individual product card
   const renderProductCard = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.productCard}>
+    <TouchableOpacity 
+      style={styles.productCard}
+      onPress={() => navigation.navigate('ProductDetails', { productId: item.id })}
+    >
       <Image source={{ uri: item.image }} style={styles.productImage} />
       <View style={styles.productInfo}>
         <View style={styles.ratingContainer}>
@@ -128,25 +135,30 @@ const CoffeeProductListing = () => {
     </TouchableOpacity>
   );
 
+  // Set up header button
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity 
+          style={styles.cartButton}
+          onPress={() => navigation.navigate('Cart')}
+        >
+          <Feather name="shopping-bag" size={24} color="#fff" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Coffee Shop</Text>
-          <TouchableOpacity style={styles.cartButton}>
-            <Feather name="shopping-bag" size={24} color="#000" />
-          </TouchableOpacity>
-        </View>
-        
-        <View style={styles.searchContainer}>
-          <Feather name="search" size={20} color="#7D7D7D" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search coffee..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
+      <View style={styles.searchContainer}>
+        <Feather name="search" size={20} color="#7D7D7D" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search coffee..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
       </View>
 
       <View style={styles.categoriesContainer}>
@@ -173,24 +185,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9F9F9',
   },
-  header: {
-    padding: 16,
-    backgroundColor: '#FFF',
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  cartButton: {
-    padding: 8,
-  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -198,6 +192,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 8,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
   },
   searchIcon: {
     marginRight: 8,
@@ -294,6 +291,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  cartButton: {
+    padding: 8,
+    marginRight: 8,
   },
 });
 
