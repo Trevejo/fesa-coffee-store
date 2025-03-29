@@ -7,4 +7,5 @@ export type RootStackParamList = {
   ProductManagement: undefined;
   CategoryManagement: undefined;
   SalesHistory: undefined;
+  MainTabs: undefined;
 }; 

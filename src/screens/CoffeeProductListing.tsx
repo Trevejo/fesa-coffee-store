@@ -6,13 +6,14 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  SafeAreaView,
   TextInput,
-  ScrollView
+  ScrollView,
+  StatusBar
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Sample coffee product data
 const coffeeProducts = [
@@ -78,6 +79,7 @@ const categories = ['All', 'Hot Coffee', 'Cold Coffee', 'Seasonal'];
 type Props = NativeStackScreenProps<RootStackParamList, 'Products'>;
 
 const CoffeeProductListing = ({ navigation }: Props) => {
+  const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -135,22 +137,21 @@ const CoffeeProductListing = ({ navigation }: Props) => {
     </TouchableOpacity>
   );
 
-  // Set up header button
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9F9F9" />
+      
+      {/* Custom Header */}
+      <View style={[styles.headerContainer, { paddingTop: (insets.top + 10) || 26 }]}>
+        <Text style={styles.headerTitle}>Coffee Products</Text>
         <TouchableOpacity 
           style={styles.cartButton}
           onPress={() => navigation.navigate('Cart')}
         >
-          <Feather name="shopping-bag" size={24} color="#fff" />
+          <Feather name="shopping-bag" size={24} color="#6F4E37" />
         </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
+      </View>
 
-  return (
-    <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
         <Feather name="search" size={20} color="#7D7D7D" style={styles.searchIcon} />
         <TextInput
@@ -176,7 +177,7 @@ const CoffeeProductListing = ({ navigation }: Props) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.productList}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -184,6 +185,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9F9F9',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: '#F9F9F9',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#6F4E37',
+  },
+  cartButton: {
+    padding: 8,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -193,7 +212,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     marginHorizontal: 16,
-    marginTop: 16,
+    marginTop: 8,
     marginBottom: 8,
   },
   searchIcon: {
@@ -291,10 +310,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  cartButton: {
-    padding: 8,
-    marginRight: 8,
   },
 });
 

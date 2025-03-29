@@ -4,11 +4,13 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity
+  TouchableOpacity,
+  StatusBar
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SalesHistory'>;
 
@@ -60,6 +62,8 @@ const salesData = [
 ];
 
 const SalesHistoryScreen = ({ navigation }: Props) => {
+  const insets = useSafeAreaInsets();
+  
   const formatCurrency = (amount: number) => {
     return `$${amount.toFixed(2)}`;
   };
@@ -101,7 +105,9 @@ const SalesHistoryScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9F9F9" />
+      
+      <View style={[styles.header, { paddingTop: (insets.top + 10) || 26 }]}>
         <Text style={styles.headerText}>Sales History</Text>
       </View>
       
@@ -134,15 +140,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9F9F9',
   },
   header: {
-    padding: 16,
-    backgroundColor: '#FFF',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: '#F9F9F9',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
   },
   headerText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#6F4E37',
   },
   stats: {
     flexDirection: 'row',

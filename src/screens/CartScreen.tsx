@@ -1,21 +1,33 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, Button, StatusBar, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Cart'>;
 
 const CartScreen = ({ navigation }: Props) => {
+  const insets = useSafeAreaInsets();
+  
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your Cart</Text>
-      <Text style={styles.subtitle}>Cart functionality will be implemented later</Text>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="Back to Products" 
-          onPress={() => navigation.navigate('Products')}
-        />
+      <View style={[styles.header, { paddingTop: (insets.top + 10) || 26 }]}>
+        <Text style={styles.headerTitle}>Your Cart</Text>
+      </View>
+      
+      <View style={styles.content}>
+        <Text style={styles.subtitle}>Cart functionality will be implemented later</Text>
+        
+        <View style={styles.buttonContainer}>
+          <Button 
+            title="Back to Products" 
+            onPress={() => navigation.navigate('Products')}
+            color="#6F4E37"
+          />
+        </View>
       </View>
     </View>
   );
@@ -24,16 +36,27 @@ const CartScreen = ({ navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: '#F9F9F9',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#6F4E37',
+  },
+  content: {
+    flex: 1,
     padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFF',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#6F4E37',
   },
   subtitle: {
     fontSize: 16,

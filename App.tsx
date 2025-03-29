@@ -1,10 +1,13 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import { initDatabase } from './src/database';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CoffeeProductListing from './src/screens/CoffeeProductListing';
 import ProductDetailsScreen from './src/screens/ProductDetailsScreen';
 import ProductManagementScreen from './src/screens/ProductManagementScreen';
@@ -15,43 +18,64 @@ import { RootStackParamList } from './src/types/navigation';
 
 // For the main navigation flow
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<RootStackParamList>();
 
-// HomeScreen for navigation hub
-const HomeScreen = ({ navigation }: any) => {
+// Main tab navigator
+function TabNavigator() {
   return (
-    <View style={styles.homeContainer}>
-      <Text style={styles.title}>Coffee Shop App</Text>
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="Coffee Products" 
-          onPress={() => navigation.navigate('Products')}
-          color="#6F4E37"
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="Product Management" 
-          onPress={() => navigation.navigate('ProductManagement')}
-          color="#6F4E37"
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="Category Management" 
-          onPress={() => navigation.navigate('CategoryManagement')}
-          color="#6F4E37"
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="Sales History" 
-          onPress={() => navigation.navigate('SalesHistory')}
-          color="#6F4E37"
-        />
-      </View>
-    </View>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === 'Products') {
+            iconName = focused ? 'cafe' : 'cafe-outline';
+          } else if (route.name === 'ProductManagement') {
+            iconName = focused ? 'create' : 'create-outline';
+          } else if (route.name === 'CategoryManagement') {
+            iconName = focused ? 'list' : 'list-outline';
+          } else if (route.name === 'SalesHistory') {
+            iconName = focused ? 'time' : 'time-outline';
+          } else if (route.name === 'Cart') {
+            iconName = focused ? 'cart' : 'cart-outline';
+          }
+
+          // You can return any component here!
+          return <Ionicons name={iconName as any} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: '#6F4E37',
+        tabBarInactiveTintColor: 'gray',
+        headerShown: false, // Hide the header for tab screens
+      })}
+    >
+      <Tab.Screen 
+        name="Products" 
+        component={CoffeeProductListing}
+        options={{ title: 'Products' }}
+      />
+      <Tab.Screen 
+        name="ProductManagement" 
+        component={ProductManagementScreen} 
+        options={{ title: 'Products' }}
+      />
+      <Tab.Screen 
+        name="CategoryManagement" 
+        component={CategoryManagementScreen}
+        options={{ title: 'Categories' }}
+      />
+      <Tab.Screen 
+        name="SalesHistory" 
+        component={SalesHistoryScreen}
+        options={{ title: 'History' }}
+      />
+      <Tab.Screen 
+        name="Cart" 
+        component={CartScreen}
+        options={{ title: 'Cart' }}
+      />
+    </Tab.Navigator>
   );
-};
+}
 
 // Loading and error screens
 const LoadingScreen = () => (
@@ -105,57 +129,25 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Home"
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#6F4E37',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      >
-        <Stack.Screen 
-          name="Home" 
-          component={HomeScreen}
-          options={{ title: 'Coffee Shop' }}
-        />
-        <Stack.Screen 
-          name="Products" 
-          component={CoffeeProductListing}
-          options={{ title: 'Coffee Products' }}
-        />
-        <Stack.Screen 
-          name="ProductDetails" 
-          component={ProductDetailsScreen}
-          options={{ title: 'Product Details' }}
-        />
-        <Stack.Screen 
-          name="ProductManagement" 
-          component={ProductManagementScreen}
-          options={{ title: 'Product Management' }}
-        />
-        <Stack.Screen 
-          name="CategoryManagement" 
-          component={CategoryManagementScreen}
-          options={{ title: 'Category Management' }}
-        />
-        <Stack.Screen 
-          name="SalesHistory" 
-          component={SalesHistoryScreen}
-          options={{ title: 'Sales History' }}
-        />
-        <Stack.Screen 
-          name="Cart" 
-          component={CartScreen}
-          options={{ title: 'Your Cart' }}
-        />
-      </Stack.Navigator>
-      <StatusBar style="light" />
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false, // Hide header for all stack screens by default
+          }}
+        >
+          <Stack.Screen 
+            name="MainTabs" 
+            component={TabNavigator} 
+          />
+          <Stack.Screen 
+            name="ProductDetails" 
+            component={ProductDetailsScreen}
+          />
+        </Stack.Navigator>
+        <StatusBar style="dark" />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
@@ -166,13 +158,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  homeContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -182,9 +167,5 @@ const styles = StyleSheet.create({
   error: {
     color: 'red',
     marginTop: 10,
-  },
-  buttonContainer: {
-    width: '100%',
-    marginVertical: 10,
   },
 });

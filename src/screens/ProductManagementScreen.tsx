@@ -8,11 +8,13 @@ import {
   TextInput,
   Modal,
   ScrollView,
-  Alert
+  Alert,
+  StatusBar
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProductManagement'>;
 
@@ -42,6 +44,7 @@ const initialProducts = [
 ];
 
 const ProductManagementScreen = ({ navigation }: Props) => {
+  const insets = useSafeAreaInsets();
   const [products, setProducts] = useState(initialProducts);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState({
@@ -145,8 +148,10 @@ const ProductManagementScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Manage Products</Text>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9F9F9" />
+      
+      <View style={[styles.header, { paddingTop: (insets.top + 10) || 26 }]}>
+        <Text style={styles.headerText}>Product Management</Text>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={handleAddProduct}
@@ -241,15 +246,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#FFF',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: '#F9F9F9',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
   },
   headerText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#6F4E37',
   },
   addButton: {
     backgroundColor: '#6F4E37',

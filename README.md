@@ -1,9 +1,9 @@
 ## Checklist do Projeto - Aplicação React Native de Vendas
 
-1.  [ ] **Configuração Inicial:**
+1.  [X] **Configuração Inicial:**
     *   [X] Criar projeto React Native.
-    *   [ ] Configurar SQLite.
-    *   [ ] Definir estrutura de dados/tabelas.
+    *   [X] Configurar SQLite.
+    *   [X] Definir estrutura de dados/tabelas.
 2.  [ ] **CRUD de Produtos:**
     *   [ ] Criar tela de cadastro de produtos (código, descrição, preço, categoria).
     *   [ ] Implementar funcionalidades de criar, ler, atualizar e deletar (CRUD).
@@ -19,5 +19,5 @@
     *   [ ] Listar todas as vendas (dados da venda, produtos vendidos).
     *   [ ] Exibir valor total da venda.
 6.  [ ] **Funcionalidade Adicional:** Implementar funcionalidade definida pelo grupo (ex: gráfico, top X produtos).
-7.  [ ] **Estilização:** Estilizar telas e componentes.
+7.  [X] **Estilização:** Estilizar telas e componentes.
 8.  [ ] **Testes e Revisão:** Testar funcionalidades e revisar o código.

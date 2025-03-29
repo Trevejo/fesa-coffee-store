@@ -7,11 +7,13 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
-  Alert
+  Alert,
+  StatusBar
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CategoryManagement'>;
 
@@ -35,6 +37,7 @@ const initialCategories = [
 ];
 
 const CategoryManagementScreen = ({ navigation }: Props) => {
+  const insets = useSafeAreaInsets();
   const [categories, setCategories] = useState(initialCategories);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentCategory, setCurrentCategory] = useState({
@@ -122,8 +125,10 @@ const CategoryManagementScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Manage Categories</Text>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9F9F9" />
+      
+      <View style={[styles.header, { paddingTop: (insets.top + 10) || 26 }]}>
+        <Text style={styles.headerText}>Category Management</Text>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={handleAddCategory}
@@ -199,15 +204,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#FFF',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: '#F9F9F9',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
   },
   headerText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#6F4E37',
   },
   addButton: {
     backgroundColor: '#6F4E37',
