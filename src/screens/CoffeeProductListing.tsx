@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { productRepository, Product } from '../database';
 
 // Sample coffee product data
 const coffeeProducts = [
@@ -82,29 +83,45 @@ const CoffeeProductListing = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      console.log('Loading products...');
+      try {
+        const loadedProducts = await productRepository.getAll();
+        console.log('Products loaded successfully:', loadedProducts);
+        setProducts(loadedProducts);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   // Filter products based on category and search query
-  const filteredProducts = coffeeProducts.filter(product => {
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = selectedCategory === 'All' || product.category_id.toString() === selectedCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   // Render individual product card
-  const renderProductCard = ({ item }: { item: any }) => (
+  const renderProductCard = ({ item }: { item: Product }) => (
     <TouchableOpacity 
       style={styles.productCard}
-      onPress={() => navigation.navigate('ProductDetails', { productId: item.id })}
+      onPress={() => navigation.navigate('ProductDetails', { productId: item.id?.toString() || '' })}
     >
-      <Image source={{ uri: item.image }} style={styles.productImage} />
+      <Image source={{ uri: item.image_url || 'https://picsum.photos/300/300' }} style={styles.productImage} />
       <View style={styles.productInfo}>
         <View style={styles.ratingContainer}>
           <Feather name="star" size={14} color="#FFD700" />
-          <Text style={styles.ratingText}>{item.rating}</Text>
+          <Text style={styles.ratingText}>4.5</Text>
         </View>
         <Text style={styles.productName}>{item.name}</Text>
         <Text style={styles.productDescription} numberOfLines={2}>
-          {item.description}
+          {item.description || ''}
         </Text>
         <View style={styles.priceRow}>
           <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
@@ -171,7 +188,7 @@ const CoffeeProductListing = ({ navigation }: Props) => {
       <FlatList
         data={filteredProducts}
         renderItem={renderProductCard}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.id?.toString() || ''}
         numColumns={2}
         columnWrapperStyle={styles.productRow}
         showsVerticalScrollIndicator={false}
