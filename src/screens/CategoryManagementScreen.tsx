@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,9 +11,11 @@ import {
   StatusBar
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Category, categoryRepository } from '../database'; 
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CategoryManagement'>;
 
@@ -38,19 +40,35 @@ const initialCategories = [
 
 const CategoryManagementScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
-  const [categories, setCategories] = useState(initialCategories);
+  //const [categories, setCategories] = useState(initialCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState({
-    id: '',
+  const [currentCategory, setCurrentCategory] = useState<Category>({
+    id: undefined,
     name: '',
     description: ''
   });
   const [isEditing, setIsEditing] = useState(false);
 
+  useEffect(() => {
+      loadCategories();
+    }, []);
+
+  const loadCategories = async () => {
+    console.log('Loading categories...');
+    try {
+      const loadedCategories = await categoryRepository.getAll();
+      console.log('Categories loaded successfully:', loadedCategories.map(category => category.name));
+      setCategories(loadedCategories);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
   const handleAddCategory = () => {
     setIsEditing(false);
     setCurrentCategory({
-      id: Date.now().toString(),
+      id: undefined,
       name: '',
       description: ''
     });
@@ -63,7 +81,7 @@ const CategoryManagementScreen = ({ navigation }: Props) => {
     setModalVisible(true);
   };
 
-  const handleDeleteCategory = (id: string) => {
+  const handleDeleteCategory = (id: number) => {
     Alert.alert(
       "Delete Category",
       "Are you sure you want to delete this category?",
@@ -74,8 +92,11 @@ const CategoryManagementScreen = ({ navigation }: Props) => {
         },
         { 
           text: "Delete", 
-          onPress: () => {
-            setCategories(categories.filter(category => category.id !== id));
+          onPress: async () => {
+            await categoryRepository.delete(id);
+            const deletedCategory = categories.find(item => item.id === id);
+            console.log('Category deleted successfully:', deletedCategory?.name);
+            loadCategories();
           },
           style: "destructive"
         }
@@ -83,21 +104,26 @@ const CategoryManagementScreen = ({ navigation }: Props) => {
     );
   };
 
-  const handleSaveCategory = () => {
+  const handleSaveCategory = async () => {
     if (!currentCategory.name) {
       Alert.alert("Error", "Category name is required");
       return;
     }
 
-    if (isEditing) {
-      setCategories(categories.map(category => 
-        category.id === currentCategory.id ? currentCategory : category
-      ));
-    } else {
-      setCategories([...categories, currentCategory]);
+    try {
+      if (isEditing) {
+        await categoryRepository.update(currentCategory);
+      } else {
+        await categoryRepository.create(currentCategory);
+      }
+  
+      console.log('Category saved successfully:', currentCategory.name);
+      loadCategories();
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Error saving category:', error);
+      Alert.alert("Error", "There was an issue saving the category");
     }
-    
-    setModalVisible(false);
   };
 
   const renderCategoryItem = ({ item }: { item: any }) => (
@@ -139,7 +165,7 @@ const CategoryManagementScreen = ({ navigation }: Props) => {
 
       <FlatList
         data={categories}
-        keyExtractor={item => item.id}
+        keyExtractor={item => (item.id ? item.id.toString() : 'default_id')}
         renderItem={renderCategoryItem}
         contentContainerStyle={styles.list}
       />

@@ -45,6 +45,7 @@ const initialProducts = [
 
 const ProductManagementScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
+  //const [products, setProducts] = useState(initialProducts);
   const [products, setProducts] = useState(initialProducts);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState({

@@ -15,6 +15,7 @@ declare module 'expo-sqlite' {
       insertId: number;
       rowsAffected: number;
     }>;
+    closeAsync(): Promise<void>;
   }
 
   export function openDatabaseAsync(

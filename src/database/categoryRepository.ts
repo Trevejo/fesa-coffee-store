@@ -10,8 +10,10 @@ export const categoryRepository = {
   // Get all categories
   getAll: async (): Promise<Category[]> => {
     const db = await getDBConnection();
-    const result = await db.execAsync('SELECT * FROM categories ORDER BY name');
-    return result.rows._array as Category[];
+    const result = await db.getAllAsync('SELECT * FROM categories ORDER BY name');
+    await db.closeAsync();
+    //return result.rows._array as Category[];
+    return result as Category[];
   },
 
   // Get category by id
@@ -27,11 +29,12 @@ export const categoryRepository = {
   // Create a new category
   create: async (category: Category): Promise<number> => {
     const db = await getDBConnection();
-    const result = await db.execAsync(
+    const result = await db.runAsync(
       'INSERT INTO categories (name, description) VALUES (?, ?)',
       [category.name, category.description || '']
     );
-    return result.insertId;
+    await db.closeAsync();
+    return result.lastInsertRowId;
   },
 
   // Update an existing category
@@ -41,17 +44,19 @@ export const categoryRepository = {
     }
 
     const db = await getDBConnection();
-    const result = await db.execAsync(
+    const result = await db.runAsync(
       'UPDATE categories SET name = ?, description = ? WHERE id = ?',
       [category.name, category.description || '', category.id]
     );
-    return result.rowsAffected > 0;
+    await db.closeAsync();
+    return result.changes == 1;
   },
 
   // Delete a category
   delete: async (id: number): Promise<boolean> => {
     const db = await getDBConnection();
-    const result = await db.execAsync('DELETE FROM categories WHERE id = ?', [id]);
-    return result.rowsAffected > 0;
+    const result = await db.runAsync('DELETE FROM categories WHERE id = ?', [id]);
+    await db.closeAsync();
+    return result.changes == 1;
   }
 }; 

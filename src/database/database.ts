@@ -1,10 +1,17 @@
 import * as SQLite from 'expo-sqlite';
+import { testProducts } from '../mocks/products';
+import { testCategories } from '../mocks/categories';
+
+// Get database connection
+export const getDBConnection = async () => {
+  return await SQLite.openDatabaseAsync('coffeeshop.db');
+}; 
 
 // Initialize database connection and tables
 export const initDatabase = async () => {
   try {
     // Open database connection
-    const db = await SQLite.openDatabaseAsync('coffeeshop.db');
+    const db = await getDBConnection();
     
     // Create categories table
     await db.execAsync(
@@ -24,11 +31,10 @@ export const initDatabase = async () => {
         description TEXT,
         price REAL NOT NULL,
         image_url TEXT,
-        available BOOLEAN DEFAULT 1,
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )`
     );
-    
+    await db.closeAsync();
     console.log('Database initialized successfully');
     return db;
   } catch (error) {
@@ -37,7 +43,34 @@ export const initDatabase = async () => {
   }
 };
 
-// Get database connection (should be called after initDatabase)
-export const getDBConnection = async () => {
-  return await SQLite.openDatabaseAsync('coffeeshop.db');
-}; 
+// Insert data for testing
+export const insertTestData = async () => {
+  try {
+    const db = await getDBConnection();
+
+    // Insert categories
+    for (const category of testCategories) {
+      const result = await db.runAsync(
+        'INSERT OR IGNORE INTO categories (id, name, description) VALUES (?, ?, ?)', 
+        [category.id, category.name, category.description]
+      );
+    }
+    console.log('Categories test data inserted successfully');
+
+    // Insert products
+    for (const product of testProducts) {
+      await db.runAsync('INSERT OR IGNORE INTO products (category_id, name, description, price, image_url) VALUES (?, ?, ?, ?, ?)', [
+        product.category_id,
+        product.name,
+        product.description,
+        product.price,
+        product.image_url,
+      ]);
+    }
+    console.log('Products test data inserted successfully');
+
+    await db.closeAsync();
+  } catch (error) {
+    console.error('Error inserting test data:', error);
+  }
+};

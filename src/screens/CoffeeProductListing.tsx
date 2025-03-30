@@ -90,7 +90,7 @@ const CoffeeProductListing = ({ navigation }: Props) => {
       console.log('Loading products...');
       try {
         const loadedProducts = await productRepository.getAll();
-        console.log('Products loaded successfully:', loadedProducts);
+        console.log('Products loaded successfully:', loadedProducts.map(product => product.name));
         setProducts(loadedProducts);
       } catch (error) {
         console.error('Error loading products:', error);
