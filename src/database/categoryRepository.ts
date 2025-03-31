@@ -12,7 +12,6 @@ export const categoryRepository = {
     const db = await getDBConnection();
     const result = await db.getAllAsync('SELECT * FROM categories ORDER BY name');
     await db.closeAsync();
-    //return result.rows._array as Category[];
     return result as Category[];
   },
 

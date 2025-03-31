@@ -59,7 +59,8 @@ export const insertTestData = async () => {
 
     // Insert products
     for (const product of testProducts) {
-      await db.runAsync('INSERT OR IGNORE INTO products (category_id, name, description, price, image_url) VALUES (?, ?, ?, ?, ?)', [
+      await db.runAsync('INSERT OR IGNORE INTO products (id, category_id, name, description, price, image_url) VALUES (?, ?, ?, ?, ?, ?)', [
+        product.id,
         product.category_id,
         product.name,
         product.description,

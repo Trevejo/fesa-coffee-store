@@ -19,28 +19,8 @@ import { Category, categoryRepository } from '../database';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CategoryManagement'>;
 
-// Sample category data - in a real app, this would come from a database
-const initialCategories = [
-  {
-    id: '1',
-    name: 'Hot Coffee',
-    description: 'Warm coffee beverages served hot'
-  },
-  {
-    id: '2',
-    name: 'Cold Coffee',
-    description: 'Chilled coffee beverages served cold or with ice'
-  },
-  {
-    id: '3',
-    name: 'Seasonal',
-    description: 'Limited time special coffee offerings'
-  }
-];
-
 const CategoryManagementScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
-  //const [categories, setCategories] = useState(initialCategories);
   const [categories, setCategories] = useState<Category[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentCategory, setCurrentCategory] = useState<Category>({

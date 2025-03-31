@@ -102,7 +102,7 @@ const CoffeeProductListing = ({ navigation }: Props) => {
 
   // Filter products based on category and search query
   const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'All' || product.category_id.toString() === selectedCategory;
+    const matchesCategory = selectedCategory === 'All' || product.category_id?.toString() === selectedCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
