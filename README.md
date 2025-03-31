@@ -18,6 +18,14 @@
 5.  [ ] **Tela de Listagem de Vendas:**
     *   [ ] Listar todas as vendas (dados da venda, produtos vendidos).
     *   [ ] Exibir valor total da venda.
-6.  [ ] **Funcionalidade Adicional:** Implementar funcionalidade definida pelo grupo (ex: gráfico, top X produtos).
+6.  [ ] **Funcionalidade Adicional:** Implementar DASHBOARD
 7.  [X] **Estilização:** Estilizar telas e componentes.
 8.  [ ] **Testes e Revisão:** Testar funcionalidades e revisar o código.
+
+## Tarefas Pendentes:
+
+- [ ] Corrigir campo de preço para aceitar ponto decimal (tela de cadastro de produtos)
+- [ ] Transformar campo de categorias em combobox (tela de cadastro de produtos)
+- [ ] Separar componentes utilizados nas telas para uma pasta /components
+- [ ] Refatorar navegação
+- [ ] Remover tab de carrinho
