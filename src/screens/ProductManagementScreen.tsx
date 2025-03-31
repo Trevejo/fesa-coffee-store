@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,55 +15,50 @@ import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { testProducts } from '../mocks/products';
+import { productRepository, Product } from '../database';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProductManagement'>;
 
-// Sample product data - in a real app, this would come from a database
-const initialProducts = [
-  {
-    id: '1',
-    name: 'Espresso',
-    description: 'Strong concentrated coffee served in small shots',
-    price: 3.99,
-    category: 'Hot Coffee'
-  },
-  {
-    id: '2',
-    name: 'Cappuccino',
-    description: 'Espresso with steamed milk foam',
-    price: 4.99,
-    category: 'Hot Coffee'
-  },
-  {
-    id: '3',
-    name: 'Iced Americano',
-    description: 'Espresso diluted with cold water and ice',
-    price: 4.49,
-    category: 'Cold Coffee'
-  },
-];
-
 const ProductManagementScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState({
-    id: '',
+  const [currentProduct, setCurrentProduct] = useState<Product>({
+    id: undefined,
+    category_id: undefined,
+    category_name: '',
     name: '',
     description: '',
-    price: '',
-    category: ''
+    price: 0,
+    image_url: undefined,
   });
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+  
+  const loadProducts = async () => {
+    console.log('Loading Products...');
+    try {
+      const loadedProducts = await productRepository.getAll();
+      console.log('Products loaded successfully:', loadedProducts.map(product => product.name));
+      setProducts(loadedProducts);
+    } catch (error) {
+      console.error('Error loading Products:', error);
+    }
+  };
 
   const handleAddProduct = () => {
     setIsEditing(false);
     setCurrentProduct({
-      id: Date.now().toString(),
+      id: undefined,
+      category_id: undefined,
       name: '',
       description: '',
-      price: '',
-      category: ''
+      price: 0,
+      image_url: undefined,
     });
     setModalVisible(true);
   };
@@ -77,7 +72,7 @@ const ProductManagementScreen = ({ navigation }: Props) => {
     setModalVisible(true);
   };
 
-  const handleDeleteProduct = (id: string) => {
+  const handleDeleteProduct = (id: number) => {
     Alert.alert(
       "Delete Product",
       "Are you sure you want to delete this product?",
@@ -88,8 +83,11 @@ const ProductManagementScreen = ({ navigation }: Props) => {
         },
         { 
           text: "Delete", 
-          onPress: () => {
-            setProducts(products.filter(product => product.id !== id));
+          onPress: async () => {
+            await productRepository.delete(id);
+            const deletedProduct = products.find(product => product.id === id);
+            console.log('Product deleted successfully:', deletedProduct?.name);
+            loadProducts();
           },
           style: "destructive"
         }
@@ -97,29 +95,31 @@ const ProductManagementScreen = ({ navigation }: Props) => {
     );
   };
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
     if (!currentProduct.name || !currentProduct.price) {
       Alert.alert("Error", "Name and price are required");
       return;
     }
 
-    const price = parseFloat(currentProduct.price);
-    if (isNaN(price) || price <= 0) {
+    if (isNaN(currentProduct.price) || currentProduct.price <= 0) {
       Alert.alert("Error", "Price must be a valid number greater than 0");
       return;
     }
 
-    if (isEditing) {
-      setProducts(products.map(product => 
-        product.id === currentProduct.id 
-          ? { ...currentProduct, price } 
-          : product
-      ));
-    } else {
-      setProducts([...products, { ...currentProduct, price }]);
-    }
+    try {
+      if (isEditing) {
+        await productRepository.update(currentProduct);
+      } else {
+        await productRepository.create(currentProduct);
+      }
     
-    setModalVisible(false);
+      console.log('Product saved successfully:', currentProduct.name);
+      loadProducts();
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      Alert.alert("Error", "There was an issue saving the product");
+    }
   };
 
   const renderProductItem = ({ item }: { item: any }) => (
@@ -162,7 +162,7 @@ const ProductManagementScreen = ({ navigation }: Props) => {
 
       <FlatList
         data={products}
-        keyExtractor={item => item.id}
+        keyExtractor={item => (item.id ? item.id.toString() : 'default_id')}
         renderItem={renderProductItem}
         contentContainerStyle={styles.list}
       />
@@ -201,8 +201,8 @@ const ProductManagementScreen = ({ navigation }: Props) => {
               <Text style={styles.inputLabel}>Price</Text>
               <TextInput
                 style={styles.input}
-                value={currentProduct.price}
-                onChangeText={(text) => setCurrentProduct({...currentProduct, price: text})}
+                value={currentProduct.price.toString()}
+                onChangeText={(text) => setCurrentProduct({...currentProduct, price: text === "" ? 0 : parseFloat(text) || 0})}
                 placeholder="0.00"
                 keyboardType="decimal-pad"
               />
@@ -210,8 +210,8 @@ const ProductManagementScreen = ({ navigation }: Props) => {
               <Text style={styles.inputLabel}>Category</Text>
               <TextInput
                 style={styles.input}
-                value={currentProduct.category}
-                onChangeText={(text) => setCurrentProduct({...currentProduct, category: text})}
+                value={currentProduct.category_name}
+                onChangeText={(text) => setCurrentProduct({...currentProduct, category_name: text})}
                 placeholder="Product category"
               />
             </ScrollView>

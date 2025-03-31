@@ -2,20 +2,26 @@ import { getDBConnection } from './database';
 
 export interface Product {
   id?: number;
-  category_id: number;
+  category_id?: number;
+  category_name?: string;
   name: string;
   description?: string;
   price: number;
   image_url?: string;
-  available?: boolean;
 }
 
 export const productRepository = {
   // Get all products
   getAll: async (): Promise<Product[]> => {
     const db = await getDBConnection();
-    const result = await db.execAsync('SELECT * FROM products ORDER BY name');
-    return result.rows._array as Product[];
+    //const result = await db.getAllAsync('SELECT * FROM products ORDER BY name');
+    const result = await db.getAllAsync(
+      `SELECT products.*, categories.name as category_name 
+       FROM products 
+       LEFT JOIN categories ON products.category_id = categories.id`
+    );
+    await db.closeAsync();
+    return result as Product[];
   },
 
   // Get product by id
@@ -41,20 +47,20 @@ export const productRepository = {
   // Create a new product
   create: async (product: Product): Promise<number> => {
     const db = await getDBConnection();
-    const result = await db.execAsync(
+    const result = await db.runAsync(
       `INSERT INTO products (
-        category_id, name, description, price, image_url, available
-      ) VALUES (?, ?, ?, ?, ?, ?)`,
+        category_id, name, description, price, image_url
+      ) VALUES (?, ?, ?, ?, ?)`,
       [
         product.category_id,
         product.name,
         product.description || '',
         product.price,
         product.image_url || '',
-        product.available === false ? 0 : 1
       ]
     );
-    return result.insertId;
+    await db.closeAsync();
+    return result.lastInsertRowId;
   },
 
   // Update an existing product
@@ -64,14 +70,13 @@ export const productRepository = {
     }
 
     const db = await getDBConnection();
-    const result = await db.execAsync(
+    const result = await db.runAsync(
       `UPDATE products SET 
         category_id = ?, 
         name = ?, 
         description = ?, 
         price = ?, 
-        image_url = ?, 
-        available = ? 
+        image_url = ? 
        WHERE id = ?`,
       [
         product.category_id,
@@ -79,17 +84,18 @@ export const productRepository = {
         product.description || '',
         product.price,
         product.image_url || '',
-        product.available === false ? 0 : 1,
         product.id
       ]
     );
-    return result.rowsAffected > 0;
+    await db.closeAsync();
+    return result.changes == 1;
   },
 
   // Delete a product
   delete: async (id: number): Promise<boolean> => {
     const db = await getDBConnection();
-    const result = await db.execAsync('DELETE FROM products WHERE id = ?', [id]);
-    return result.rowsAffected > 0;
+    const result = await db.runAsync('DELETE FROM products WHERE id = ?', [id]);
+    await db.closeAsync();
+    return result.changes == 1;
   }
 }; 

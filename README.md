@@ -4,12 +4,12 @@
     *   [X] Criar projeto React Native.
     *   [X] Configurar SQLite.
     *   [X] Definir estrutura de dados/tabelas.
-2.  [ ] **CRUD de Produtos:**
-    *   [ ] Criar tela de cadastro de produtos (código, descrição, preço, categoria).
-    *   [ ] Implementar funcionalidades de criar, ler, atualizar e deletar (CRUD).
+2.  [X] **CRUD de Produtos:**
+    *   [X] Criar tela de cadastro de produtos (código, descrição, preço, categoria).
+    *   [X] Implementar funcionalidades de criar, ler, atualizar e deletar (CRUD).
 3.  [ ] **CRUD de Categorias:**
-    *   [ ] Criar tela de cadastro de categorias.
-    *   [ ] Implementar funcionalidades de criar, ler, atualizar e deletar (CRUD).
+    *   [X] Criar tela de cadastro de categorias.
+    *   [X] Implementar funcionalidades de criar, ler, atualizar e deletar (CRUD).
     *   [ ] Adicionar campo de categoria ao cadastro de produtos.
 4.  [ ] **Tela de Venda:**
     *   [ ] Listar produtos disponíveis (filtrar por categoria).

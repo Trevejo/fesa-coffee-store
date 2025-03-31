@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { useEffect, useState } from 'react';
-import { initDatabase } from './src/database';
+import { initDatabase, insertTestData } from './src/database';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -100,6 +100,7 @@ export default function App() {
     const initDb = async () => {
       try {
         await initDatabase();
+        await insertTestData();
         setIsDbInitialized(true);
       } catch (err) {
         console.error('Error initializing database:', err);
