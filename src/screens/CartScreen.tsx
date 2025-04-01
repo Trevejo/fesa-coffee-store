@@ -108,13 +108,13 @@ const CartScreen = ({ navigation, route }: Props) => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       
       <View style={[styles.header, { paddingTop: (insets.top + 10) || 26 }]}>
-        <Text style={styles.headerTitle}>Your Cart</Text>
         <TouchableOpacity 
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
           <Feather name="arrow-left" size={24} color="#6F4E37" />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Your Cart</Text>
       </View>
       
       <FlatList
@@ -141,22 +141,23 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: 8,
     backgroundColor: '#FFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
     position: 'relative',
   },
   headerTitle: {
+    flex: 1,
     fontSize: 20,
     fontWeight: 'bold',
     color: '#6F4E37',
+    textAlign: 'center',
+    marginRight: 40, // To compensate for the back button width
   },
   backButton: {
-    position: 'absolute',
-    left: 16,
+    padding: 8,
   },
   list: {
     paddingVertical: 10,
