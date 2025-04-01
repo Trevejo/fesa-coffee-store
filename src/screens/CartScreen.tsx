@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { View, Text, StyleSheet, FlatList, StatusBar, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
@@ -20,18 +20,21 @@ const CartScreen = ({ navigation, route }: Props) => {
         cartItems.map(async (item) => {
           const details = await productRepository.getById(item.id);
           if (!details) return item;
-          return { ...item, name: details.name, description: details.description };
+          return { 
+            ...item, 
+            name: details.name, 
+            description: details.description,
+            price: details.price 
+          };
         })
       );
       setCartItems(updatedItems);
     };
 
-    if (cartItems.length > 0 && cartItems.some(item => !item.name || !item.description)) {
-      console.log('Loading items details...');
+    if (cartItems.length > 0 && cartItems.some(item => !item.name || !item.description || !item.price)) {
       loadItemsDetails();
     }
   }, []);
-
 
   const handleIncrement = (id: number) => {
     const updatedItems = cartItems.map(item =>
@@ -51,7 +54,55 @@ const CartScreen = ({ navigation, route }: Props) => {
     navigation.setParams({ cartItems: updatedItems });
   };
 
-  
+  const { subtotal, tax, total } = useMemo(() => {
+    const subtotal = cartItems.reduce((sum, item) => 
+      sum + (item.price || 0) * item.quantity, 0
+    );
+    const tax = subtotal * 0.1; // 10% tax
+    const total = subtotal + tax;
+    return { subtotal, tax, total };
+  }, [cartItems]);
+
+  const formatPrice = (price: number) => {
+    return `$${price.toFixed(2)}`;
+  };
+
+  const renderCartItem = ({ item }: { item: CartItem }) => (
+    <View style={styles.cartItem}>
+      <View style={styles.itemInfo}>
+        <Text style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemDescription}>{item.description}</Text>
+        <Text style={styles.itemPrice}>{formatPrice(item.price || 0)}</Text>
+      </View>
+      <View style={styles.quantityControl}>
+        <TouchableOpacity onPress={() => handleDecrement(item.id)} style={styles.actionButton}>
+          <Feather name="minus" size={18} color="#6F4E37" />
+        </TouchableOpacity>
+        <Text style={styles.quantityText}>{item.quantity}</Text>
+        <TouchableOpacity onPress={() => handleIncrement(item.id)} style={styles.actionButton}>
+          <Feather name="plus" size={18} color="#6F4E37" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const renderSummary = () => (
+    <View style={styles.summaryContainer}>
+      <View style={styles.summaryRow}>
+        <Text style={styles.summaryLabel}>Subtotal</Text>
+        <Text style={styles.summaryValue}>{formatPrice(subtotal)}</Text>
+      </View>
+      <View style={styles.summaryRow}>
+        <Text style={styles.summaryLabel}>Tax (10%)</Text>
+        <Text style={styles.summaryValue}>{formatPrice(tax)}</Text>
+      </View>
+      <View style={[styles.summaryRow, styles.totalRow]}>
+        <Text style={styles.totalLabel}>Total</Text>
+        <Text style={styles.totalValue}>{formatPrice(total)}</Text>
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
@@ -69,25 +120,16 @@ const CartScreen = ({ navigation, route }: Props) => {
       <FlatList
         data={cartItems}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.cartItem}>
-            <View style={styles.itemInfo}>
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemDescription}>{item.description}</Text>
-            </View>
-            <View style={styles.quantityControl}>
-              <TouchableOpacity onPress={() => handleDecrement(item.id)} style={styles.actionButton}>
-                <Feather name="minus" size={18} color="#6F4E37" />
-              </TouchableOpacity>
-              <Text style={styles.quantityText}>{item.quantity}</Text>
-              <TouchableOpacity onPress={() => handleIncrement(item.id)} style={styles.actionButton}>
-                <Feather name="plus" size={18} color="#6F4E37" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+        renderItem={renderCartItem}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <View style={styles.emptyCart}>
+            <Text style={styles.emptyCartText}>Your cart is empty</Text>
+          </View>
+        }
       />
+
+      {cartItems.length > 0 && renderSummary()}
     </View>
   );
 };
@@ -111,21 +153,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#6F4E37',
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 32,
-    textAlign: 'center',
-  },
-  buttonContainer: {
-    marginTop: 16,
   },
   backButton: {
     position: 'absolute',
@@ -153,6 +180,13 @@ const styles = StyleSheet.create({
   itemDescription: {
     fontSize: 14,
     color: "#666",
+    marginTop: 4,
+  },
+  itemPrice: {
+    fontSize: 16,
+    color: "#6F4E37",
+    fontWeight: "600",
+    marginTop: 4,
   },
   quantityControl: {
     flexDirection: "row",
@@ -169,6 +203,52 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#6F4E37",
     marginHorizontal: 8,
+  },
+  summaryContainer: {
+    padding: 16,
+    backgroundColor: '#FFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  summaryLabel: {
+    fontSize: 16,
+    color: '#666',
+  },
+  summaryValue: {
+    fontSize: 16,
+    color: '#333',
+  },
+  totalRow: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#6F4E37',
+  },
+  totalValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#6F4E37',
+  },
+  emptyCart: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  emptyCartText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });
 

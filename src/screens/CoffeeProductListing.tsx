@@ -184,7 +184,16 @@ const CoffeeProductListing = ({ navigation, route }: Props) => {
           style={styles.cartButton}
           onPress={() => navigation.navigate('Cart', { cartItems })}
         >
-          <Feather name="shopping-bag" size={24} color="#6F4E37" />
+          <View style={styles.cartIconContainer}>
+            <Feather name="shopping-bag" size={24} color="#6F4E37" />
+            {cartItems.length > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>
+                  {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+                </Text>
+              </View>
+            )}
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -346,6 +355,26 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  cartIconContainer: {
+    position: 'relative',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#6F4E37',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  cartBadgeText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 

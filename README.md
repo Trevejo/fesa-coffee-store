@@ -17,7 +17,7 @@
     *   [ ] Efetivar venda (código da venda, produtos, data).
 5.  [ ] **Tela de Listagem de Vendas:**
     *   [ ] Listar todas as vendas (dados da venda, produtos vendidos).
-    *   [ ] Exibir valor total da venda.
+    *   [X] Exibir valor total da venda.
 6.  [ ] **Funcionalidade Adicional:** Implementar DASHBOARD
 7.  [X] **Estilização:** Estilizar telas e componentes.
 8.  [ ] **Testes e Revisão:** Testar funcionalidades e revisar o código.
