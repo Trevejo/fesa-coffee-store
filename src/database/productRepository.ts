@@ -27,12 +27,10 @@ export const productRepository = {
   // Get product by id
   getById: async (id: number): Promise<Product | null> => {
     const db = await getDBConnection();
-    const result = await db.execAsync('SELECT * FROM products WHERE id = ?', [id]);
-    if (result.rows.length > 0) {
-      return result.rows._array[0] as Product;
-    }
-    return null;
-  },
+    const product = await db.getFirstAsync<Product>('SELECT * FROM products WHERE id = ?', [id]);
+
+    return product || null;
+},
 
   // Get products by category
   getByCategory: async (categoryId: number): Promise<Product[]> => {

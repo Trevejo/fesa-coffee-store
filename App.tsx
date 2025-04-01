@@ -68,11 +68,6 @@ function TabNavigator() {
         component={SalesHistoryScreen}
         options={{ title: 'History' }}
       />
-      <Tab.Screen 
-        name="Cart" 
-        component={CartScreen}
-        options={{ title: 'Cart' }}
-      />
     </Tab.Navigator>
   );
 }
@@ -144,6 +139,10 @@ export default function App() {
           <Stack.Screen 
             name="ProductDetails" 
             component={ProductDetailsScreen}
+          />
+          <Stack.Screen 
+            name="Cart" 
+            component={CartScreen}
           />
         </Stack.Navigator>
         <StatusBar style="dark" />

@@ -1,8 +1,10 @@
+import { CartItem } from './cart';
+
 export type RootStackParamList = {
   Home: undefined;
-  Products: undefined;
+  Products: { cartItems?: CartItem[] };
   ProductDetails: { productId: string };
-  Cart: undefined;
+  Cart: { cartItems?: CartItem[] };
   Checkout: undefined;
   ProductManagement: undefined;
   CategoryManagement: undefined;

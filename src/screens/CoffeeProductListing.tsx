@@ -15,6 +15,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { productRepository, Product } from '../database';
+import { CartItem } from '../types/cart';
 
 // Sample coffee product data
 const coffeeProducts = [
@@ -79,11 +80,12 @@ const categories = ['All', 'Hot Coffee', 'Cold Coffee', 'Seasonal'];
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Products'>;
 
-const CoffeeProductListing = ({ navigation }: Props) => {
+const CoffeeProductListing = ({ navigation, route }: Props) => {
   const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(route.params?.cartItems ?? []);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -99,6 +101,23 @@ const CoffeeProductListing = ({ navigation }: Props) => {
 
     loadProducts();
   }, []);
+
+  const handleAddToCart = (item: Product) => {
+    if (item.id === undefined) return;
+
+    const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
+    const updatedCartItems: CartItem[] = existingItem
+      ? cartItems.map(cartItem =>
+          cartItem.id === item.id
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
+        )
+      : [...cartItems, { id: item.id, quantity: 1 }];
+
+    console.log('Cart updated:', updatedCartItems);
+    setCartItems(updatedCartItems);
+    navigation.setParams({ cartItems: updatedCartItems });
+  };
 
   // Filter products based on category and search query
   const filteredProducts = products.filter(product => {
@@ -125,7 +144,7 @@ const CoffeeProductListing = ({ navigation }: Props) => {
         </Text>
         <View style={styles.priceRow}>
           <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
-          <TouchableOpacity style={styles.addButton}>
+          <TouchableOpacity style={styles.addButton} onPress={() => handleAddToCart(item)}>
             <Feather name="plus" size={16} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -163,7 +182,7 @@ const CoffeeProductListing = ({ navigation }: Props) => {
         <Text style={styles.headerTitle}>Coffee Products</Text>
         <TouchableOpacity 
           style={styles.cartButton}
-          onPress={() => navigation.navigate('Cart')}
+          onPress={() => navigation.navigate('Cart', { cartItems })}
         >
           <Feather name="shopping-bag" size={24} color="#6F4E37" />
         </TouchableOpacity>
