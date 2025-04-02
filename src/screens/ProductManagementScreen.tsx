@@ -35,6 +35,7 @@ const ProductManagementScreen = ({ navigation }: Props) => {
     price: 0,
     image_url: undefined,
   });
+  const [currentPrice, setCurrentPrice] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
   const loadData = async () => {
@@ -74,12 +75,10 @@ const ProductManagementScreen = ({ navigation }: Props) => {
     setModalVisible(true);
   };
 
-  const handleEditProduct = (product: any) => {
+  const handleEditProduct = (product: Product) => {
     setIsEditing(true);
-    setCurrentProduct({
-      ...product,
-      price: product.price.toString()
-    });
+    setCurrentProduct(product);
+    setCurrentPrice(product.price.toFixed(2));
     setModalVisible(true);
   };
 
@@ -107,28 +106,32 @@ const ProductManagementScreen = ({ navigation }: Props) => {
   };
 
   const handleSaveProduct = async () => {
+    const priceNumber = parseFloat(currentPrice);
+  
     if (!currentProduct.name || !currentProduct.price) {
       Alert.alert("Error", "Name and price are required");
       return;
     }
-
-    if (isNaN(currentProduct.price) || currentProduct.price <= 0) {
+  
+    if (isNaN(priceNumber) || priceNumber <= 0) {
       Alert.alert("Error", "Price must be a valid number greater than 0");
       return;
     }
-
+  
     try {
+      const updatedProduct = { ...currentProduct, price: priceNumber };
+  
       if (isEditing) {
-        await productRepository.update(currentProduct);
+        await productRepository.update(updatedProduct);
       } else {
-        await productRepository.create(currentProduct);
+        await productRepository.create(updatedProduct);
       }
-    
-      console.log('Product saved successfully:', currentProduct.name);
+  
+      console.log("Product saved successfully:", updatedProduct.name);
       loadData();
       setModalVisible(false);
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error("Error saving product:", error);
       Alert.alert("Error", "There was an issue saving the product");
     }
   };
@@ -212,8 +215,8 @@ const ProductManagementScreen = ({ navigation }: Props) => {
               <Text style={styles.inputLabel}>Price</Text>
               <TextInput
                 style={styles.input}
-                value={currentProduct.price.toString()}
-                onChangeText={(text) => setCurrentProduct({...currentProduct, price: text === "" ? 0 : parseFloat(text) || 0})}
+                value={currentPrice}
+                onChangeText={(text) => setCurrentPrice(text)}
                 placeholder="0.00"
                 keyboardType="decimal-pad"
               />
