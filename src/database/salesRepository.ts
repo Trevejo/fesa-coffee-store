@@ -2,7 +2,7 @@ import { getDBConnection } from './database';
 
 export interface SaleItem {
   product_id: number;
-  product_name: string;
+  product_name?: string;
   quantity: number;
   price: number;
 }
@@ -42,8 +42,8 @@ export const salesRepository = {
         }
 
         await db.runAsync(
-          `INSERT INTO sale_items (sale_id, product_id, quantity, price, product_name) VALUES (?, ?, ?, ?, ?)`,
-          [saleId, item.product_id, item.quantity, product.price, item.product_name]
+          `INSERT INTO sale_items (sale_id, product_id, quantity, price) VALUES (?, ?, ?, ?)`,
+          [saleId, item.product_id, item.quantity, product.price]
         );
       }
       
