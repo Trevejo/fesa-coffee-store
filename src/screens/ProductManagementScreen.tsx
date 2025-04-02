@@ -36,30 +36,27 @@ const ProductManagementScreen = ({ navigation }: Props) => {
   });
   const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    loadProducts();
-    loadCategories();
-  }, []);
-  
-  const loadProducts = async () => {
-    console.log('Loading Products...');
+  const loadData = async () => {
     try {
+      // First load products
+      console.log('Loading Products...');
       const loadedProducts = await productRepository.getAll();
       console.log('Products loaded successfully:', loadedProducts.map(product => product.name));
       setProducts(loadedProducts);
+
+      // Then load categories
+      console.log('Loading categories...');
+      const loadedCategories = await categoryRepository.getAll();
+      console.log('Categories loaded successfully:', loadedCategories.map(category => category.name));
+      setCategories(loadedCategories);
     } catch (error) {
-      console.error('Error loading Products:', error);
+      console.error('Error loading data:', error);
     }
   };
 
-  const loadCategories = async () => {
-    try {
-      const loadedCategories = await categoryRepository.getAll();
-      setCategories(loadedCategories);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
-  };
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleAddProduct = () => {
     setIsEditing(false);
@@ -98,7 +95,7 @@ const ProductManagementScreen = ({ navigation }: Props) => {
             await productRepository.delete(id);
             const deletedProduct = products.find(product => product.id === id);
             console.log('Product deleted successfully:', deletedProduct?.name);
-            loadProducts();
+            loadData();
           },
           style: "destructive"
         }
@@ -125,7 +122,7 @@ const ProductManagementScreen = ({ navigation }: Props) => {
       }
     
       console.log('Product saved successfully:', currentProduct.name);
-      loadProducts();
+      loadData();
       setModalVisible(false);
     } catch (error) {
       console.error('Error saving product:', error);

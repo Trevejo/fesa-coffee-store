@@ -89,30 +89,26 @@ const CoffeeProductListing = ({ navigation, route }: Props) => {
   const [cartItems, setCartItems] = useState<CartItem[]>(route.params?.cartItems ?? []);
 
   useEffect(() => {
-    loadProducts();
-    loadCategories();
+    const loadData = async () => {
+      try {
+        // First load products
+        console.log('Loading products...');
+        const loadedProducts = await productRepository.getAll();
+        console.log('Products loaded successfully:', loadedProducts.map(product => product.name));
+        setProducts(loadedProducts);
+
+        // Then load categories
+        console.log('Loading categories...');
+        const loadedCategories = await categoryRepository.getAll();
+        console.log('Categories loaded successfully:', loadedCategories.map(category => category.name));
+        setCategories(loadedCategories);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+
+    loadData();
   }, []);
-
-  const loadProducts = async () => {
-    console.log('Loading products...');
-    try {
-      const loadedProducts = await productRepository.getAll();
-      console.log('Products loaded successfully:', loadedProducts.map(product => product.name));
-      setProducts(loadedProducts);
-    } catch (error) {
-      console.error('Error loading products:', error);
-    }
-  };
-
-  const loadCategories = async () => {
-    try {
-      const loadedCategories = await categoryRepository.getAll();
-      setCategories(loadedCategories);
-      console.log('Categories loaded successfully:', loadedCategories.map(category => category.name));
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
-  };
 
   const handleAddToCart = (item: Product) => {
     if (item.id === undefined) return;
