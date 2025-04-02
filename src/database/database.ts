@@ -34,6 +34,31 @@ export const initDatabase = async () => {
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )`
     );
+
+    // Create sales table
+    await db.execAsync(
+      `CREATE TABLE IF NOT EXISTS sales (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        time TEXT NOT NULL,
+        total REAL NOT NULL,
+        payment_method TEXT NOT NULL DEFAULT 'Cash'
+      )`
+    );
+
+    // Create sale items table
+    await db.execAsync(
+      `CREATE TABLE IF NOT EXISTS sale_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        price REAL NOT NULL,
+        FOREIGN KEY (sale_id) REFERENCES sales (id),
+        FOREIGN KEY (product_id) REFERENCES products (id)
+      )`
+    );
+
     await db.closeAsync();
     console.log('Database initialized successfully');
     return db;

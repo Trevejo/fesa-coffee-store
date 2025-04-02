@@ -112,7 +112,12 @@ const CoffeeProductListing = ({ navigation, route }: Props) => {
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
         )
-      : [...cartItems, { id: item.id, quantity: 1 }];
+      : [...cartItems, { 
+          id: item.id, 
+          quantity: 1,
+          name: item.name,
+          price: item.price
+        }];
 
     console.log('Cart updated:', updatedCartItems);
     setCartItems(updatedCartItems);

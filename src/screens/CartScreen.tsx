@@ -1,12 +1,13 @@
 import React from 'react';
 import { useEffect, useState, useMemo } from "react";
-import { View, Text, StyleSheet, FlatList, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, StatusBar, TouchableOpacity, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { CartItem } from '../types/cart';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { productRepository, Product } from '../database';
+import { salesRepository, Sale } from '../database/salesRepository';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Cart'>;
 
@@ -67,6 +68,51 @@ const CartScreen = ({ navigation, route }: Props) => {
     return `$${price.toFixed(2)}`;
   };
 
+  const handlePurchase = async () => {
+    try {
+      const now = new Date();
+      const sale: Sale = {
+        date: now.toISOString().split('T')[0],
+        time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        total,
+        payment_method: 'Cash',
+        items: cartItems.map(item => ({
+          product_name: item.name,
+          product_id: item.id,
+          quantity: item.quantity,
+          price: item.price || 0
+        }))
+      };
+
+      console.log('sale' + JSON.stringify(sale));
+
+      await salesRepository.create(sale);
+      
+      Alert.alert(
+        'Purchase Successful!',
+        'Thank you for your purchase!',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.setParams({ cartItems: [] });
+              navigation.navigate('MainTabs', {
+                screen: 'Products',
+                params: { cartItems: [] }
+              });
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error processing purchase:', error);
+      Alert.alert(
+        'Error',
+        'There was an error processing your purchase. Please try again.'
+      );
+    }
+  };
+
   const renderCartItem = ({ item }: { item: CartItem }) => (
     <View style={styles.cartItem}>
       <View style={styles.itemInfo}>
@@ -100,6 +146,12 @@ const CartScreen = ({ navigation, route }: Props) => {
         <Text style={styles.totalLabel}>Total</Text>
         <Text style={styles.totalValue}>{formatPrice(total)}</Text>
       </View>
+      <TouchableOpacity 
+        style={styles.purchaseButton}
+        onPress={handlePurchase}
+      >
+        <Text style={styles.purchaseButtonText}>Complete Purchase</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -154,7 +206,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#6F4E37',
     textAlign: 'center',
-    marginRight: 40, // To compensate for the back button width
+    marginRight: 40,
   },
   backButton: {
     padding: 8,
@@ -239,6 +291,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#6F4E37',
+  },
+  purchaseButton: {
+    backgroundColor: '#6F4E37',
+    padding: 16,
+    borderRadius: 8,
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  purchaseButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   emptyCart: {
     flex: 1,

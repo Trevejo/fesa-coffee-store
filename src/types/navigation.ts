@@ -9,5 +9,10 @@ export type RootStackParamList = {
   ProductManagement: undefined;
   CategoryManagement: undefined;
   SalesHistory: undefined;
-  MainTabs: undefined;
+  MainTabs: {
+    screen?: string;
+    params?: {
+      cartItems?: CartItem[];
+    };
+  };
 }; 
