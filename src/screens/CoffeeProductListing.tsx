@@ -12,71 +12,11 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { productRepository, Product, categoryRepository, Category } from '../database';
 import { CartItem } from '../types/cart';
-
-// Sample coffee product data
-const coffeeProducts = [
-  {
-    id: '1',
-    name: 'Espresso',
-    description: 'Strong concentrated coffee served in small shots',
-    price: 3.99,
-    image: 'https://picsum.photos/id/431/300/300',
-    rating: 4.8,
-    category: 'Hot Coffee'
-  },
-  {
-    id: '2',
-    name: 'Cappuccino',
-    description: 'Espresso with steamed milk foam',
-    price: 4.99,
-    image: 'https://picsum.photos/id/425/300/300',
-    rating: 4.7,
-    category: 'Hot Coffee'
-  },
-  {
-    id: '3',
-    name: 'Iced Americano',
-    description: 'Espresso diluted with cold water and ice',
-    price: 4.49,
-    image: 'https://picsum.photos/id/493/300/300',
-    rating: 4.5,
-    category: 'Cold Coffee'
-  },
-  {
-    id: '4',
-    name: 'Caramel Macchiato',
-    description: 'Espresso with vanilla syrup, milk and caramel drizzle',
-    price: 5.49,
-    image: 'https://picsum.photos/id/435/300/300',
-    rating: 4.9,
-    category: 'Hot Coffee'
-  },
-  {
-    id: '5',
-    name: 'Cold Brew',
-    description: 'Coffee brewed with cold water over extended time',
-    price: 4.99,
-    image: 'https://picsum.photos/id/430/300/300',
-    rating: 4.6,
-    category: 'Cold Coffee'
-  },
-  {
-    id: '6',
-    name: 'Mocha Frappuccino',
-    description: 'Blended coffee with chocolate, milk and ice',
-    price: 5.99,
-    image: 'https://picsum.photos/id/437/300/300',
-    rating: 4.7,
-    category: 'Cold Coffee'
-  },
-];
-
-// Categories for filtering
-const categories = ['All', 'Hot Coffee', 'Cold Coffee', 'Seasonal'];
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Products'>;
 
@@ -88,27 +28,29 @@ const CoffeeProductListing = ({ navigation, route }: Props) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>(route.params?.cartItems ?? []);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        // First load products
-        console.log('Loading products...');
-        const loadedProducts = await productRepository.getAll();
-        console.log('Products loaded successfully:', loadedProducts.map(product => product.name));
-        setProducts(loadedProducts);
+  const loadData = async () => {
+    try {
+      // First load products
+      console.log('Loading products...');
+      const loadedProducts = await productRepository.getAll();
+      console.log('Products loaded successfully:', loadedProducts.map(product => product.name));
+      setProducts(loadedProducts);
 
-        // Then load categories
-        console.log('Loading categories...');
-        const loadedCategories = await categoryRepository.getAll();
-        console.log('Categories loaded successfully:', loadedCategories.map(category => category.name));
-        setCategories(loadedCategories);
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
-    };
+      // Then load categories
+      console.log('Loading categories...');
+      const loadedCategories = await categoryRepository.getAll();
+      console.log('Categories loaded successfully:', loadedCategories.map(category => category.name));
+      setCategories(loadedCategories);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  };
 
-    loadData();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   const handleAddToCart = (item: Product) => {
     if (item.id === undefined) return;

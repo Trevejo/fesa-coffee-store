@@ -6,6 +6,7 @@
       "ES2015",
       "DOM"
     ],
+    "noImplicitAny": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "ES2015",

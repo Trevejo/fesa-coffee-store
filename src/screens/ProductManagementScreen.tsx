@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { testProducts } from '../mocks/products';
 import { productRepository, Product, categoryRepository, Category } from '../database';
 import { Picker } from '@react-native-picker/picker';
+import { useFocusEffect } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProductManagement'>;
 
@@ -54,9 +55,11 @@ const ProductManagementScreen = ({ navigation }: Props) => {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   const handleAddProduct = () => {
     setIsEditing(false);
