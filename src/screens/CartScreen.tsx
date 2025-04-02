@@ -77,7 +77,6 @@ const CartScreen = ({ navigation, route }: Props) => {
         total,
         payment_method: 'Cash',
         items: cartItems.map(item => ({
-          product_name: item.name,
           product_id: item.id,
           quantity: item.quantity,
           price: item.price || 0

@@ -6,13 +6,15 @@ import {
   FlatList,
   TouchableOpacity,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sale, SaleItem, salesRepository } from '../database';
+import { resetDatabase } from '../database/database';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SalesHistory'>;
 
@@ -21,6 +23,7 @@ const SalesHistoryScreen = ({ navigation }: Props) => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tapCount, setTapCount] = useState(0);
   
   useEffect(() => {
     loadSales();
@@ -42,6 +45,42 @@ const SalesHistoryScreen = ({ navigation }: Props) => {
   
   const formatCurrency = (amount: number) => {
     return `$${amount.toFixed(2)}`;
+  };
+  
+  const handleTitlePress = async () => {
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+    
+    if (newCount === 5) {
+      setTapCount(0);
+      Alert.alert(
+        'Reset Database',
+        'Are you sure you want to completely reset the database? This will delete ALL data and recreate tables with initial test data.',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel'
+          },
+          {
+            text: 'Reset',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                setIsLoading(true);
+                await resetDatabase();
+                await loadSales();
+                Alert.alert('Success', 'Database has been completely reset with initial test data');
+              } catch (err) {
+                console.error('Error resetting database:', err);
+                Alert.alert('Error', 'Failed to reset database');
+              } finally {
+                setIsLoading(false);
+              }
+            }
+          }
+        ]
+      );
+    }
   };
   
   const renderSaleItem = ({ item }: { item: Sale }) => (
@@ -103,7 +142,9 @@ const SalesHistoryScreen = ({ navigation }: Props) => {
       <StatusBar barStyle="dark-content" backgroundColor="#F9F9F9" />
       
       <View style={[styles.header, { paddingTop: (insets.top + 10) || 26 }]}>
-        <Text style={styles.headerText}>Sales History</Text>
+        <TouchableOpacity onPress={handleTitlePress}>
+          <Text style={styles.headerText}>Sales History</Text>
+        </TouchableOpacity>
       </View>
       
       <View style={styles.stats}>
