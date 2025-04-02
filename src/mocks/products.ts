@@ -7,7 +7,7 @@ export const testProducts: Product[] = [
     name: 'Espresso',
     description: 'Strong concentrated coffee served in small shots',
     price: 3.99,
-    image_url: 'https://example.com/espresso.jpg',
+    image_url: 'https://images.pexels.com/photos/1695052/pexels-photo-1695052.jpeg',
   },
   {
     id: 2,
@@ -15,7 +15,7 @@ export const testProducts: Product[] = [
     name: 'Cappuccino',
     description: 'Espresso with steamed milk foam',
     price: 4.99,
-    image_url: 'https://example.com/cappuccino.jpg',
+    image_url: 'https://images.pexels.com/photos/533393/pexels-photo-533393.jpeg',
   },
   {
     id: 3,
@@ -23,6 +23,6 @@ export const testProducts: Product[] = [
     name: 'Iced Americano',
     description: 'Espresso diluted with cold water and ice',
     price: 4.49,
-    image_url: 'https://example.com/iced-americano.jpg',
+    image_url: 'https://images.pexels.com/photos/9360311/pexels-photo-9360311.jpeg',
   }
 ];

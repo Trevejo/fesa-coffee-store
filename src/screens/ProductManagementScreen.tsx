@@ -9,16 +9,18 @@ import {
   Modal,
   ScrollView,
   Alert,
-  StatusBar
+  StatusBar,
+  Image,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { testProducts } from '../mocks/products';
 import { productRepository, Product, categoryRepository, Category } from '../database';
 import { Picker } from '@react-native-picker/picker';
 import { useFocusEffect } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
+import { getRandomCoffeeImage } from '../utils/defaultImages';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProductManagement'>;
 
@@ -120,7 +122,12 @@ const ProductManagementScreen = ({ navigation }: Props) => {
     }
   
     try {
-      const updatedProduct = { ...currentProduct, price: priceNumber };
+      let updatedProduct = { ...currentProduct, price: priceNumber };
+
+      // If no image is uploaded, use a random coffee image
+      if (!updatedProduct.image_url) {
+        updatedProduct.image_url = getRandomCoffeeImage();
+      }
   
       if (isEditing) {
         await productRepository.update(updatedProduct);
@@ -134,6 +141,34 @@ const ProductManagementScreen = ({ navigation }: Props) => {
     } catch (error) {
       console.error("Error saving product:", error);
       Alert.alert("Error", "There was an issue saving the product");
+    }
+  };
+
+  // Request permissions when component mounts
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Sorry, we need camera roll permissions to make this work!');
+      }
+    })();
+  }, []);
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setCurrentProduct({ ...currentProduct, image_url: result.assets[0].uri });
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
     }
   };
 
@@ -223,24 +258,44 @@ const ProductManagementScreen = ({ navigation }: Props) => {
               />
               
               <Text style={styles.inputLabel}>Category</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={currentProduct.category_id}
-                  onValueChange={(itemValue) =>
-                    setCurrentProduct({...currentProduct, category_id: itemValue})
-                  }
-                  style={styles.picker}
+              <Picker
+                selectedValue={currentProduct.category_id}
+                onValueChange={(itemValue) =>
+                  setCurrentProduct({...currentProduct, category_id: itemValue})
+                }
+                style={styles.picker}
+              >
+                <Picker.Item label="Select a category" value={undefined} />
+                {categories.map((category) => (
+                  <Picker.Item
+                    key={category.id}
+                    label={category.name}
+                    value={category.id}
+                  />
+                ))}
+              </Picker>
+
+              <Text style={styles.inputLabel}>Product Image</Text>
+              {currentProduct.image_url && (
+                <Image
+                  source={{ uri: currentProduct.image_url }}
+                  style={styles.previewImage}
+                />
+              )}
+              
+              <View style={styles.imageActions}>
+                <TouchableOpacity
+                  style={[styles.imageButton, styles.uploadButton]}
+                  onPress={pickImage}
                 >
-                  <Picker.Item label="Select a category" value={undefined} />
-                  {categories.map((category) => (
-                    <Picker.Item
-                      key={category.id}
-                      label={category.name}
-                      value={category.id}
-                    />
-                  ))}
-                </Picker>
+                  <Feather name="upload" size={20} color="#6F4E37" />
+                  <Text style={styles.imageButtonText}>Upload Image</Text>
+                </TouchableOpacity>
               </View>
+              
+              <Text style={styles.imageWarning}>
+                <Feather name="info" size={12} color="#6F4E37" /> If no image is uploaded, a random coffee image will be used
+              </Text>
             </ScrollView>
             
             <View style={styles.modalActions}>
@@ -414,6 +469,43 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     width: '100%',
+  },
+  previewImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginVertical: 8,
+    resizeMode: 'cover',
+  },
+  imageActions: {
+    marginVertical: 8,
+  },
+  imageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    justifyContent: 'center',
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#6F4E37',
+  },
+  uploadButton: {
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#6F4E37',
+  },
+  imageButtonText: {
+    marginLeft: 8,
+    color: '#6F4E37',
+    fontWeight: '500',
+  },
+  imageWarning: {
+    fontSize: 12,
+    color: '#6F4E37',
+    fontStyle: 'italic',
+    marginTop: 4,
+    opacity: 0.8,
   },
 });
 
