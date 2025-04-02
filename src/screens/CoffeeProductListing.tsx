@@ -74,6 +74,25 @@ const CoffeeProductListing = ({ navigation, route }: Props) => {
     navigation.setParams({ cartItems: updatedCartItems });
   };
 
+  const handleRemoveFromCart = (item: Product) => {
+    if (item.id === undefined) return;
+
+    const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
+    if (!existingItem) return;
+
+    const updatedCartItems: CartItem[] = existingItem.quantity > 1
+      ? cartItems.map(cartItem =>
+          cartItem.id === item.id
+            ? { ...cartItem, quantity: cartItem.quantity - 1 }
+            : cartItem
+        )
+      : cartItems.filter(cartItem => cartItem.id !== item.id);
+
+    console.log('Cart updated:', updatedCartItems);
+    setCartItems(updatedCartItems);
+    navigation.setParams({ cartItems: updatedCartItems });
+  };
+
   // Filter products based on category and search query
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
@@ -82,30 +101,57 @@ const CoffeeProductListing = ({ navigation, route }: Props) => {
   });
 
   // Render individual product card
-  const renderProductCard = ({ item }: { item: Product }) => (
-    <TouchableOpacity 
-      style={styles.productCard}
-      onPress={() => navigation.navigate('ProductDetails', { productId: item.id?.toString() || '' })}
-    >
-      <Image source={{ uri: item.image_url || 'https://picsum.photos/300/300' }} style={styles.productImage} />
-      <View style={styles.productInfo}>
-        <View style={styles.ratingContainer}>
-          <Feather name="star" size={14} color="#FFD700" />
-          <Text style={styles.ratingText}>4.5</Text>
-        </View>
-        <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.productDescription} numberOfLines={2}>
-          {item.description || ''}
-        </Text>
-        <View style={styles.priceRow}>
-          <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
-          <TouchableOpacity style={styles.addButton} onPress={() => handleAddToCart(item)}>
-            <Feather name="plus" size={16} color="#fff" />
-          </TouchableOpacity>
+  const renderProductCard = ({ item }: { item: Product }) => {
+    const cartItem = cartItems.find(cartItem => cartItem.id === item.id);
+    const quantity = cartItem?.quantity || 0;
+
+    return (
+      <View
+        style={styles.productCard}
+      >
+        <Image source={{ uri: item.image_url || 'https://picsum.photos/300/300' }} style={styles.productImage} />
+        <View style={styles.productInfoContainer}>
+          <View style={styles.productInfo}>
+            <Text style={styles.productName}>{item.name}</Text>
+            <Text style={styles.productDescription} numberOfLines={2}>
+              {item.description || ''}
+            </Text>
+          </View>
+          <View style={styles.priceRow}>
+            <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+            <View style={styles.addButtonContainer}>
+              {quantity > 0 ? (
+                <>
+                  <TouchableOpacity 
+                    style={styles.quantityButton} 
+                    onPress={() => handleRemoveFromCart(item)}
+                  >
+                    <Feather name="minus" size={14} color="#6F4E37" />
+                  </TouchableOpacity>
+                  <View style={styles.quantityBadge}>
+                    <Text style={styles.quantityText}>{quantity}</Text>
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.quantityButton} 
+                    onPress={() => handleAddToCart(item)}
+                  >
+                    <Feather name="plus" size={14} color="#6F4E37" />
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <TouchableOpacity 
+                  style={styles.addButton} 
+                  onPress={() => handleAddToCart(item)}
+                >
+                  <Feather name="plus" size={16} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
         </View>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -283,18 +329,14 @@ const styles = StyleSheet.create({
     height: 150,
     resizeMode: 'cover',
   },
-  productInfo: {
+  productInfoContainer: {
     padding: 12,
+    flex: 1,
+    minHeight: 120,
+    justifyContent: 'space-between',
   },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  ratingText: {
-    fontSize: 12,
-    color: '#7D7D7D',
-    marginLeft: 4,
+  productInfo: {
+    flex: 1,
   },
   productName: {
     fontSize: 16,
@@ -311,17 +353,49 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
   productPrice: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#6F4E37',
   },
-  addButton: {
-    backgroundColor: '#6F4E37',
+  addButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 32,
+  },
+  quantityButton: {
     width: 28,
     height: 28,
     borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F0F0F0',
+    borderWidth: 1,
+    borderColor: '#6F4E37',
+  },
+  quantityBadge: {
+    backgroundColor: '#FFF',
+    borderRadius: 4,
+    minWidth: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: '#6F4E37',
+  },
+  quantityText: {
+    color: '#6F4E37',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  addButton: {
+    backgroundColor: '#6F4E37',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },

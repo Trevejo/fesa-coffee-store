@@ -9,7 +9,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CoffeeProductListing from './src/screens/CoffeeProductListing';
-import ProductDetailsScreen from './src/screens/ProductDetailsScreen';
 import ProductManagementScreen from './src/screens/ProductManagementScreen';
 import CategoryManagementScreen from './src/screens/CategoryManagementScreen';
 import SalesHistoryScreen from './src/screens/SalesHistoryScreen';
@@ -135,10 +134,6 @@ export default function App() {
           <Stack.Screen 
             name="MainTabs" 
             component={TabNavigator} 
-          />
-          <Stack.Screen 
-            name="ProductDetails" 
-            component={ProductDetailsScreen}
           />
           <Stack.Screen 
             name="Cart" 
