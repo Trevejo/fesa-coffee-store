@@ -7,6 +7,33 @@ export const getDBConnection = async () => {
   return await SQLite.openDatabaseAsync('coffeeshop.db');
 }; 
 
+// Reset database completely
+export const resetDatabase = async () => {
+  try {
+    const db = await getDBConnection();
+    
+    // Drop all tables in correct order due to foreign key constraints
+    await db.execAsync('DROP TABLE IF EXISTS sale_items');
+    await db.execAsync('DROP TABLE IF EXISTS sales');
+    await db.execAsync('DROP TABLE IF EXISTS products');
+    await db.execAsync('DROP TABLE IF EXISTS categories');
+    
+    // Close and reopen connection to ensure clean state
+    await db.closeAsync();
+    
+    // Reinitialize database with fresh tables
+    await initDatabase();
+    
+    // Insert test data
+    await insertTestData();
+    
+    console.log('Database reset successfully');
+  } catch (error) {
+    console.error('Error resetting database:', error);
+    throw error;
+  }
+};
+
 // Initialize database connection and tables
 export const initDatabase = async () => {
   try {
