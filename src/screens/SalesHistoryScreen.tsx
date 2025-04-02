@@ -145,6 +145,12 @@ const SalesHistoryScreen = ({ navigation }: Props) => {
         <TouchableOpacity onPress={handleTitlePress}>
           <Text style={styles.headerText}>Sales History</Text>
         </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.chartIcon}
+          onPress={() => navigation.navigate('Analytics')}
+        >
+          <Feather name="bar-chart-2" size={24} color="#6F4E37" />
+        </TouchableOpacity>
       </View>
       
       <View style={styles.stats}>
@@ -183,7 +189,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 12,
@@ -291,7 +297,10 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
     fontWeight: 'bold',
-  }
+  },
+  chartIcon: {
+    padding: 8,
+  },
 });
 
 export default SalesHistoryScreen; 

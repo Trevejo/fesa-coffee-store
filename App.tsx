@@ -13,6 +13,7 @@ import ProductManagementScreen from './src/screens/ProductManagementScreen';
 import CategoryManagementScreen from './src/screens/CategoryManagementScreen';
 import SalesHistoryScreen from './src/screens/SalesHistoryScreen';
 import CartScreen from './src/screens/CartScreen';
+import AnalyticsScreen from './src/screens/AnalyticsScreen';
 import { RootStackParamList } from './src/types/navigation';
 
 // For the main navigation flow
@@ -138,6 +139,10 @@ export default function App() {
           <Stack.Screen 
             name="Cart" 
             component={CartScreen}
+          />
+          <Stack.Screen 
+            name="Analytics" 
+            component={AnalyticsScreen}
           />
         </Stack.Navigator>
         <StatusBar style="dark" />

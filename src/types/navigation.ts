@@ -8,6 +8,7 @@ export type RootStackParamList = {
   ProductManagement: undefined;
   CategoryManagement: undefined;
   SalesHistory: undefined;
+  Analytics: undefined;
   MainTabs: {
     screen?: string;
     params?: {

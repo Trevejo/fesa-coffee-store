@@ -26,7 +26,7 @@
 
 - [X] Corrigir campo de preço para aceitar ponto decimal (tela de cadastro de produtos)
 - [X] Transformar campo de categorias em combobox (tela de cadastro de produtos)
-- [ ] Remover a tela de detalhes
+- [X] Remover a tela de detalhes
 - [ ] Upload de imagem no cadastro de produtos
 - [ ] Top vendas
 - [ ] Separar componentes utilizados nas telas para uma pasta /components
