@@ -14,7 +14,7 @@ import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { productRepository, Product } from '../database';
+import { productRepository, Product, categoryRepository, Category } from '../database';
 import { CartItem } from '../types/cart';
 
 // Sample coffee product data
@@ -82,25 +82,37 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Products'>;
 
 const CoffeeProductListing = ({ navigation, route }: Props) => {
   const insets = useSafeAreaInsets();
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState<number | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>(route.params?.cartItems ?? []);
 
   useEffect(() => {
-    const loadProducts = async () => {
-      console.log('Loading products...');
-      try {
-        const loadedProducts = await productRepository.getAll();
-        console.log('Products loaded successfully:', loadedProducts.map(product => product.name));
-        setProducts(loadedProducts);
-      } catch (error) {
-        console.error('Error loading products:', error);
-      }
-    };
-
     loadProducts();
+    loadCategories();
   }, []);
+
+  const loadProducts = async () => {
+    console.log('Loading products...');
+    try {
+      const loadedProducts = await productRepository.getAll();
+      console.log('Products loaded successfully:', loadedProducts.map(product => product.name));
+      setProducts(loadedProducts);
+    } catch (error) {
+      console.error('Error loading products:', error);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const loadedCategories = await categoryRepository.getAll();
+      setCategories(loadedCategories);
+      console.log('Categories loaded successfully:', loadedCategories.map(category => category.name));
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
 
   const handleAddToCart = (item: Product) => {
     if (item.id === undefined) return;
@@ -126,7 +138,7 @@ const CoffeeProductListing = ({ navigation, route }: Props) => {
 
   // Filter products based on category and search query
   const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'All' || product.category_id?.toString() === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
@@ -154,27 +166,6 @@ const CoffeeProductListing = ({ navigation, route }: Props) => {
           </TouchableOpacity>
         </View>
       </View>
-    </TouchableOpacity>
-  );
-
-  // Render category pill
-  const renderCategoryPill = (category: string) => (
-    <TouchableOpacity
-      key={category}
-      style={[
-        styles.categoryPill,
-        selectedCategory === category && styles.selectedCategoryPill
-      ]}
-      onPress={() => setSelectedCategory(category)}
-    >
-      <Text
-        style={[
-          styles.categoryText,
-          selectedCategory === category && styles.selectedCategoryText
-        ]}
-      >
-        {category}
-      </Text>
     </TouchableOpacity>
   );
 
@@ -214,7 +205,42 @@ const CoffeeProductListing = ({ navigation, route }: Props) => {
 
       <View style={styles.categoriesContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {categories.map(category => renderCategoryPill(category))}
+          <TouchableOpacity
+            key="all"
+            style={[
+              styles.categoryPill,
+              selectedCategory === 'all' && styles.selectedCategoryPill
+            ]}
+            onPress={() => setSelectedCategory('all')}
+          >
+            <Text
+              style={[
+                styles.categoryText,
+                selectedCategory === 'all' && styles.selectedCategoryText
+              ]}
+            >
+              All
+            </Text>
+          </TouchableOpacity>
+          {categories.map(category => (
+            <TouchableOpacity
+              key={category.id}
+              style={[
+                styles.categoryPill,
+                selectedCategory === category.id && styles.selectedCategoryPill
+              ]}
+              onPress={() => setSelectedCategory(category.id || 'all')}
+            >
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategory === category.id && styles.selectedCategoryText
+                ]}
+              >
+                {category.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       </View>
 

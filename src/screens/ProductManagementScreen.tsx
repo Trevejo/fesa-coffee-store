@@ -16,18 +16,19 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { testProducts } from '../mocks/products';
-import { productRepository, Product } from '../database';
+import { productRepository, Product, categoryRepository, Category } from '../database';
+import { Picker } from '@react-native-picker/picker';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProductManagement'>;
 
 const ProductManagementScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product>({
     id: undefined,
     category_id: undefined,
-    category_name: '',
     name: '',
     description: '',
     price: 0,
@@ -37,6 +38,7 @@ const ProductManagementScreen = ({ navigation }: Props) => {
 
   useEffect(() => {
     loadProducts();
+    loadCategories();
   }, []);
   
   const loadProducts = async () => {
@@ -47,6 +49,15 @@ const ProductManagementScreen = ({ navigation }: Props) => {
       setProducts(loadedProducts);
     } catch (error) {
       console.error('Error loading Products:', error);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const loadedCategories = await categoryRepository.getAll();
+      setCategories(loadedCategories);
+    } catch (error) {
+      console.error('Error loading categories:', error);
     }
   };
 
@@ -208,12 +219,24 @@ const ProductManagementScreen = ({ navigation }: Props) => {
               />
               
               <Text style={styles.inputLabel}>Category</Text>
-              <TextInput
-                style={styles.input}
-                value={currentProduct.category_name}
-                onChangeText={(text) => setCurrentProduct({...currentProduct, category_name: text})}
-                placeholder="Product category"
-              />
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={currentProduct.category_id}
+                  onValueChange={(itemValue) =>
+                    setCurrentProduct({...currentProduct, category_id: itemValue})
+                  }
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select a category" value={undefined} />
+                  {categories.map((category) => (
+                    <Picker.Item
+                      key={category.id}
+                      label={category.name}
+                      value={category.id}
+                    />
+                  ))}
+                </Picker>
+              </View>
             </ScrollView>
             
             <View style={styles.modalActions}>
@@ -375,6 +398,18 @@ const styles = StyleSheet.create({
   },
   buttonSaveText: {
     color: '#FFF',
+  },
+  pickerContainer: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
   },
 });
 
