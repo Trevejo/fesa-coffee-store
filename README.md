@@ -7,10 +7,10 @@
 2.  [X] **CRUD de Produtos:**
     *   [X] Criar tela de cadastro de produtos (código, descrição, preço, categoria).
     *   [X] Implementar funcionalidades de criar, ler, atualizar e deletar (CRUD).
-3.  [ ] **CRUD de Categorias:**
+3.  [X] **CRUD de Categorias:**
     *   [X] Criar tela de cadastro de categorias.
     *   [X] Implementar funcionalidades de criar, ler, atualizar e deletar (CRUD).
-    *   [ ] Adicionar campo de categoria ao cadastro de produtos.
+    *   [X] Adicionar campo de categoria ao cadastro de produtos.
 4.  [X] **Tela de Venda:**
     *   [X] Listar produtos disponíveis (filtrar por categoria).
     *   [X] Implementar carrinho de compras (selecionar produtos).
@@ -20,11 +20,14 @@
     *   [X] Exibir valor total da venda.
 6.  [ ] **Funcionalidade Adicional:** Implementar DASHBOARD
 7.  [X] **Estilização:** Estilizar telas e componentes.
-8.  [ ] **Testes e Revisão:** Testar funcionalidades e revisar o código.
+8.  [X] **Testes e Revisão:** Testar funcionalidades e revisar o código.
 
 ## Tarefas Pendentes:
 
-- [ ] Corrigir campo de preço para aceitar ponto decimal (tela de cadastro de produtos)
-- [ ] Transformar campo de categorias em combobox (tela de cadastro de produtos)
+- [X] Corrigir campo de preço para aceitar ponto decimal (tela de cadastro de produtos)
+- [X] Transformar campo de categorias em combobox (tela de cadastro de produtos)
+- [ ] Remover a tela de detalhes
+- [ ] Upload de imagem no cadastro de produtos
+- [ ] Top vendas
 - [ ] Separar componentes utilizados nas telas para uma pasta /components
 - [ ] Refatorar navegação
