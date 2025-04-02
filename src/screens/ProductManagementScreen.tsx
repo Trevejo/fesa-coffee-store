@@ -72,6 +72,7 @@ const ProductManagementScreen = ({ navigation }: Props) => {
       price: 0,
       image_url: undefined,
     });
+    setCurrentPrice("");
     setModalVisible(true);
   };
 
@@ -108,8 +109,8 @@ const ProductManagementScreen = ({ navigation }: Props) => {
   const handleSaveProduct = async () => {
     const priceNumber = parseFloat(currentPrice);
   
-    if (!currentProduct.name || !currentProduct.price) {
-      Alert.alert("Error", "Name and price are required");
+    if (!currentProduct.name) {
+      Alert.alert("Error", "Name is required");
       return;
     }
   
