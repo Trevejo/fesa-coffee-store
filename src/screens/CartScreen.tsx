@@ -42,17 +42,13 @@ const CartScreen = ({ navigation, route }: Props) => {
       item.id === id ? { ...item, quantity: item.quantity + 1 } : item
     );
     setCartItems(updatedItems);
-    navigation.setParams({ cartItems: updatedItems });
   };
 
   const handleDecrement = (id: number) => {
     const updatedItems = cartItems.map(item =>
-      item.id === id && item.quantity > 1
-        ? { ...item, quantity: item.quantity - 1 }
-        : item
-    );
+        item.id === id ? { ...item, quantity: item.quantity - 1 } : item
+      ).filter(item => item.quantity > 0);
     setCartItems(updatedItems);
-    navigation.setParams({ cartItems: updatedItems });
   };
 
   const { subtotal, tax, total } = useMemo(() => {
@@ -160,7 +156,13 @@ const CartScreen = ({ navigation, route }: Props) => {
       
       <View style={[styles.header, { paddingTop: (insets.top + 10) || 26 }]}>
         <TouchableOpacity 
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            navigation.setParams({ cartItems: cartItems });
+            navigation.navigate('MainTabs', {
+              screen: 'Products',
+              params: { cartItems: cartItems }
+            });
+          }}
           style={styles.backButton}
         >
           <Feather name="arrow-left" size={24} color="#6F4E37" />
