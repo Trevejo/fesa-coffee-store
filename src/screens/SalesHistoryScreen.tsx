@@ -1,74 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  StatusBar
+  StatusBar,
+  ActivityIndicator
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Sale, SaleItem, salesRepository } from '../database';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SalesHistory'>;
 
-// Sample sales data - in a real app, this would come from a database
-const salesData = [
-  {
-    id: '1',
-    date: '2023-06-12',
-    time: '10:22 AM',
-    total: 13.97,
-    items: [
-      { name: 'Espresso', quantity: 2, price: 3.99 },
-      { name: 'Cappuccino', quantity: 1, price: 5.99 }
-    ],
-    paymentMethod: 'Credit Card'
-  },
-  {
-    id: '2',
-    date: '2023-06-11',
-    time: '3:45 PM',
-    total: 22.96,
-    items: [
-      { name: 'Iced Americano', quantity: 2, price: 4.49 },
-      { name: 'Mocha Frappuccino', quantity: 2, price: 5.99 }
-    ],
-    paymentMethod: 'Cash'
-  },
-  {
-    id: '3',
-    date: '2023-06-10',
-    time: '1:12 PM',
-    total: 9.98,
-    items: [
-      { name: 'Cold Brew', quantity: 2, price: 4.99 }
-    ],
-    paymentMethod: 'Credit Card'
-  },
-  {
-    id: '4',
-    date: '2023-06-10',
-    time: '11:30 AM',
-    total: 15.96,
-    items: [
-      { name: 'Caramel Macchiato', quantity: 2, price: 5.49 },
-      { name: 'Espresso', quantity: 1, price: 4.98 }
-    ],
-    paymentMethod: 'Digital Wallet'
-  }
-];
-
 const SalesHistoryScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    loadSales();
+  }, []);
+
+  const loadSales = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const salesData = await salesRepository.getAll();
+      setSales(salesData);
+    } catch (err) {
+      setError('Failed to load sales history');
+      console.error('Error loading sales:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const formatCurrency = (amount: number) => {
     return `$${amount.toFixed(2)}`;
   };
   
-  const renderSaleItem = ({ item }: { item: any }) => (
+  const renderSaleItem = ({ item }: { item: Sale }) => (
     <TouchableOpacity style={styles.saleItem}>
       <View style={styles.saleHeader}>
         <Text style={styles.saleDate}>{item.date} at {item.time}</Text>
@@ -78,10 +54,10 @@ const SalesHistoryScreen = ({ navigation }: Props) => {
       <View style={styles.saleDetails}>
         <Text style={styles.paymentMethod}>
           <Feather 
-            name={item.paymentMethod === 'Cash' ? 'dollar-sign' : item.paymentMethod === 'Digital Wallet' ? 'smartphone' : 'credit-card'} 
+            name={item.payment_method === 'Cash' ? 'dollar-sign' : item.payment_method === 'Digital Wallet' ? 'smartphone' : 'credit-card'} 
             size={14} 
             color="#6F4E37" 
-          /> {item.paymentMethod}
+          /> {item.payment_method}
         </Text>
         <Text style={styles.itemCount}>
           <Feather name="shopping-bag" size={14} color="#6F4E37" /> {item.items.length} item{item.items.length !== 1 ? 's' : ''}
@@ -89,19 +65,38 @@ const SalesHistoryScreen = ({ navigation }: Props) => {
       </View>
       
       <View style={styles.itemsList}>
-        {item.items.map((orderItem: any, index: number) => (
+        {item.items.map((orderItem: SaleItem, index: number) => (
           <View key={index} style={styles.orderItem}>
             <Text style={styles.orderItemName}>
-              {orderItem.quantity}x {orderItem.name}
+              {orderItem.quantity}x {orderItem.product_name}
             </Text>
             <Text style={styles.orderItemPrice}>
-              {formatCurrency(orderItem.price * orderItem.quantity)}
+              {formatCurrency(orderItem.quantity * orderItem.price)}
             </Text>
           </View>
         ))}
       </View>
     </TouchableOpacity>
   );
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#6F4E37" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={loadSales}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -113,22 +108,24 @@ const SalesHistoryScreen = ({ navigation }: Props) => {
       
       <View style={styles.stats}>
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>{salesData.length}</Text>
+          <Text style={styles.statValue}>{sales.length}</Text>
           <Text style={styles.statLabel}>Total Sales</Text>
         </View>
         <View style={styles.statItem}>
           <Text style={styles.statValue}>
-            {formatCurrency(salesData.reduce((sum, sale) => sum + sale.total, 0))}
+            {formatCurrency(sales.reduce((sum, sale) => sum + sale.total, 0))}
           </Text>
           <Text style={styles.statLabel}>Total Revenue</Text>
         </View>
       </View>
       
       <FlatList
-        data={salesData}
-        keyExtractor={item => item.id}
+        data={sales}
+        keyExtractor={item => item.id?.toString() || ''}
         renderItem={renderSaleItem}
         contentContainerStyle={styles.list}
+        refreshing={isLoading}
+        onRefresh={loadSales}
       />
     </View>
   );
@@ -138,6 +135,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9F9F9',
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -233,6 +234,22 @@ const styles = StyleSheet.create({
   orderItemPrice: {
     fontSize: 13,
     color: '#333',
+  },
+  errorText: {
+    color: '#FF6B6B',
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#6F4E37',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: 'bold',
   }
 });
 
